@@ -38,8 +38,9 @@
         width: 240px;
       }
     </style>
-    <script src="jquery-1.10.2.min.js"></script>
-    <script src="xml_utils.js"></script>
+    <script src="jquery-1.10.2.min.js" type="text/javascript"></script>
+    <script src="xml_utils.js" type="text/javascript"></script>
+    <script src="highcharts.js" type="text/javascript"></script>
   </head>
   <body>
     <table cellspacing="0" cellpadding="10">
@@ -58,6 +59,7 @@
         <td valign="top">
           <div>
             Results
+            <div id="chartContainer"></div>
             <div id="results"></div>
           </div>
         </td>
@@ -73,12 +75,12 @@
       })
       .done(function(json) { 
 
-        console.log(json);
+        //console.log(json);
         
         for (i in json.queries)
         {
           query = json.queries[i];
-          $('[name=query]').append('<option value="'+query.uid+'">'+query.name+'</option>');
+          $('[name=query]').append('<option value="'+query.uid+'" data-group="'+ query.group +'">'+query.name+'</option>');
         }
       })
       .fail(function(json) {
@@ -99,12 +101,12 @@
       })
       .done(function(json) {
 
-        console.log(json);
+        //console.log(json);
         
         for (i in json.ehrs)
         {
           ehr = json.ehrs[i];
-          console.log(ehr);
+          //console.log(ehr);
           
           // To be used inside the callback
           patientEHR[ehr.subjectUid] = ehr.ehrId;
@@ -113,7 +115,7 @@
           $.ajax({ url: "controller.php", data: { op: "getPatient", uid: ehr.subjectUid }, type: "GET" })
           .done(function(patient) {
 
-            console.log(patient);
+            //console.log(patient);
             //$('[name=ehr]').append('<option value="'+ehr.ehrId+'">'+ patient.firstName +' '+ patient.lastName +'</option>');
             $('[name=ehr]').append('<option value="'+patientEHR[patient.uid]+'">'+ patient.firstName +' '+ patient.lastName +'</option>');
           });
@@ -156,17 +158,109 @@
 
               var pre = $('#results').append('<pre></pre>').children()[0];
               $(pre).text( JSON.stringify(result, undefined, 2) );
+              
+              // Render only if query is json and grouped by path
+              if ( $('option:selected', '[name=query]').data('group') == 'path' )
+              {
+                 render(result);
+              }
            } 
-
         })
         .fail(function(json) {
 
            alert('fail');
            console.log(json);
         });
-      
-        
       });
+      
+      var render = function (data)
+      {
+         var series = []; // Data to sent to Highcharts
+         
+         var xAxisLabels = [];
+         var firstRound = true;
+         $.each( data, function(path, dviseries) {
+         
+           //console.log('path y dviseries', path, dviseries);
+           
+           /**
+            * Estructura:
+            *   { name: 'John', data: [5, 7, 3] }
+            *
+            *   o si quiero mostrar una etiqueta en el punto:
+            *   { name: 'John', data: [{name:'punto', color:'#XXX', y:5},{..},{..}] }
+            */
+           var serie = { name: dviseries.name, data: [] };
+        
+
+           // FIXME: cuidado, esto es solo para DvQuantity!!!!!
+           $.each( dviseries.serie, function(ii, dvi) { // dvi {date, magnitude, units}
+            
+             //console.log('ii y dvi', ii, dvi);
+             
+             // Get dates from first serie, that will be the labels for xAxis
+             if (firstRound)
+             {
+               d = new Date(dvi.date);
+               xAxisLabels.push(d.getFullYear()+'/'+d.getMonth()+'/'+d.getDate()); // format the date to display
+             }
+             
+             // FIXME: el valor depende del tipo de dato, y para graficar se necesitan ordinales
+             // TODO: ver si se pueden graficar textos y fechas
+             // TODO: prevenir internar graficar tipos de datos que no se pueden graficar
+             //serie.data.push( dvi.magnitude );
+             
+             // para que la etiqueta muestre las unidades
+             point = {name: dvi.magnitude+' '+dvi.units, y: dvi.magnitude}
+             serie.data.push(point);
+
+           });
+           
+           series.push(serie);
+           
+           if (firstRound) firstRound = false;
+         });
+         
+         
+         console.log('data', data);
+         console.log('series', series);
+         console.log('xAxisLabels', xAxisLabels);
+         renderchart(series, xAxisLabels);
+      }
+      
+      var renderchart = function(series, xAxisLabels)
+      {
+        chart = new Highcharts.Chart({
+          chart: {
+            renderTo: 'chartContainer',
+            type: 'line',
+            zoomType: 'x' // lo deja hacer zoom en el eje x, y o ambos: xy
+          },
+          /* depende de lo que este graficando!
+          title: {
+            text: 'Blood Pressure' // TODO: obtener del arquetipo+path en la ontologia del arquetipo
+          },
+          */
+          xAxis: {
+            categories: xAxisLabels
+          },
+          /* depende de lo que este graficando!
+          yAxis: {
+            title: {
+              text: 'Blood Pressure mmHg' // TODO: obtener del arquetipo
+            }
+          },
+          */
+          plotOptions: {
+            line: {
+              dataLabels: {
+                enabled: true
+              }
+            }
+          },
+          series: series
+        });
+      };
     </script>
   </body>
 </html>
