@@ -66,7 +66,7 @@
       </tr>
     </table>
     
-    <script>
+    <script type="text/javascript">
       // Get queries from EHRServer
       $.ajax({
         url: "controller.php",
