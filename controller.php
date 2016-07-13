@@ -2,16 +2,17 @@
 
 $resultType = 'json';
 
-function login($user, $pass, $org)
+function listQueries()
 {
-    $url = 'http://localhost:8090/ehr/rest/login';
-    
-    $data = array('format' => 'json', 'username' => $user, 'password' => $pass, 'organization' => $org);
+   $url = 'http://localhost:8090/ehr/rest/queryList';
+   $data = array('format' => 'json');
 
    // use key 'http' even if you send the request to https://...
    $options = array(
       'http' => array(
-         'method'  => 'POST',
+         'method'  => 'GET',
+         //'content' => http_build_query($data), // solo para post
+         //'header'  => "Content-Type: application/x-www-form-urlencoded\r\n"
       )
    );
    
@@ -20,77 +21,38 @@ function login($user, $pass, $org)
    return $result;
 }
 
-function getIdorg($token, $username, $orgnumber)
+function listEHRs()
 {
-    $url = 'http://localhost:8090/ehr/rest/profile/' . $username;
-    $data = array('format' => 'json');
-
-   // use key 'http' even if you send the request to https://...
-   $options = array('http'=>array('method'=>'GET', 'header' => "Authorization: Bearer " . $token));
-   
-   // Because of GET data goes in URL
-   $result = file_get_contents($url.'?'.http_build_query($data), false, stream_context_create($options));
-
-   $obj = json_decode( $result, true );
-   
-   foreach ($obj["organizations"] as $item){
-       if ($item["number"] == $orgnumber)
-       {
-           $result = $item["uid"];
-           break;
-       }
-   }
-   return $result;
-}
-
-
-function listQueries($token)
-{
-    $url = 'http://localhost:8090/ehr/rest/queries';
+   $url = 'http://localhost:8090/ehr/rest/ehrList';
    $data = array('format' => 'json');
 
    // use key 'http' even if you send the request to https://...
-   $options = array('http'=>array('method'=>'GET', 'header' => "Authorization: Bearer " . $token));
+   $options = array('http'=>array('method'=>'GET'));
+   
+   // Because of GET data goes in URL
+   $result = file_get_contents($url.'?'.http_build_query($data), false, stream_context_create($options));
+   return $result;
+}
+function getPatient($uid)
+{
+   $url = 'http://localhost:8090/ehr/rest/getPatient';
+   $data = array('format' => 'json', 'uid' => $uid);
+
+   // use key 'http' even if you send the request to https://...
+   $options = array('http'=>array('method'=>'GET'));
    
    // Because of GET data goes in URL
    $result = file_get_contents($url.'?'.http_build_query($data), false, stream_context_create($options));
    return $result;
 }
 
-function listEHRs($token)
+function executeQuery($queryUID, $ehrUID)
 {
-    $url = 'http://localhost:8090/ehr/rest/ehrs';
-   $data = array('format' => 'json');
+   $url = 'http://localhost:8090/ehr/rest/query';
+   $data = array('format'=>'json', 'queryUid'=>$queryUID, 'ehrId'=>$ehrUID);
 
    // use key 'http' even if you send the request to https://...
-   $options = array('http'=>array('method'=>'GET', 'header' => "Authorization: Bearer " . $token));
-   
-   // Because of GET data goes in URL
-   $result = file_get_contents($url.'?'.http_build_query($data), false, stream_context_create($options));
-   return $result;
-}
-
-function getPatients($token)
-{
-    $url = 'http://localhost:8090/ehr/rest/patients';
-   $data = array('format' => 'json');
-
-   // use key 'http' even if you send the request to https://...
-   $options = array('http'=>array('method'=>'GET', 'header' => 'Authorization: Bearer ' . $token));
-   
-   // Because of GET data goes in URL
-   $result = file_get_contents($url.'?'.http_build_query($data), false, stream_context_create($options));
-   
-   return $result;
-}
-
-function executeQuery($token, $queryUID, $orgID, $ehrUID)
-{
-    $url = 'http://localhost:8090/ehr/rest/queries/' . $queryUID . '/execute';
-    $data = array('format'=>'json', 'organizationUid'=>$orgID, 'ehrUid'=>$ehrUID);
-
-   // use key 'http' even if you send the request to https://...
-   $options = array('http'=>array('method'=>'GET', 'header' => "Authorization: Bearer " . $token));
+   $options = array('http'=>array('method'=>'GET'));
    
    // Because of GET data goes in URL
    $result = file_get_contents($url.'?'.http_build_query($data), false, stream_context_create($options));
@@ -101,7 +63,7 @@ function executeQuery($token, $queryUID, $orgID, $ehrUID)
    
    foreach ($http_response_header as $header)
    {
-      if ($header == 'Content-Type: text/xml;charset=UTF-8') {$resultType = 'xml';}
+      if ($header == 'Content-Type: text/xml;charset=UTF-8') $resultType = 'xml';
    }
    
    return $result;
@@ -114,23 +76,17 @@ if (!isset($_REQUEST['op'])) header($_SERVER['SERVER_PROTOCOL'] . ' op should be
 $result = '';
 switch ($_REQUEST['op'])
 {
-   case 'login':
-      $result = login($_REQUEST['user'], $_REQUEST['pass'], $_REQUEST['org']);
-   break;
-   case 'getIdorg':
-      $result = getIdorg($_REQUEST['tk'], $_REQUEST['username'], $_REQUEST['orgnumber']);
-   break;
    case 'listQueries':
-      $result = listQueries($_REQUEST['tk']);
+      $result = listQueries();
    break;
    case 'listEHRs':
-      $result = listEHRs($_REQUEST['tk']);
+      $result = listEHRs();
    break;
-   case 'getPatients':
-       $result = getPatients($_REQUEST['tk']);
+   case 'getPatient':
+      $result = getPatient($_REQUEST['uid']);
    break;
    case 'executeQuery':
-       $result = executeQuery($_REQUEST['tk'], $_REQUEST['query'], $_REQUEST['org'], $_REQUEST['ehr']);
+      $result = executeQuery($_REQUEST['query'], $_REQUEST['ehr']);
    break;
 }
 
