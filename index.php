@@ -218,8 +218,10 @@
             //Submit form login. 
             //If the user is correct, save the token, username and orgnumber in localstorage.
             //Then, show de index.
-            $("#frmLogin").submit(function () {
-
+            $("#frmLogin").submit(function (e) {
+                
+                e.preventDefault();
+                
                 // Login user
                 var user = $("#username").val();
                 var pass = $("#password").val();
