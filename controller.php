@@ -4,9 +4,9 @@ $resultType = 'json';
 
 function login($user, $pass, $org)
 {
-    $url = 'http://localhost:8090/ehr/rest/login';
+   $url = 'http://localhost:8090/ehr/rest/login';
     
-    $data = array('format' => 'json', 'username' => $user, 'password' => $pass, 'organization' => $org);
+   $data = array('format' => 'json', 'username' => $user, 'password' => $pass, 'organization' => $org);
 
    // use key 'http' even if you send the request to https://...
    $options = array(
