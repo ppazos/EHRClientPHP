@@ -53,15 +53,15 @@
                                     <fieldset >
                                         <div class="form-group">
                                             <label for="username">Username</label>
-                                            <input type="text" required="true" name="username" id="username" class='form-control' value="admin" />
+                                            <input type="text" required="true" name="username" id="username" class='form-control' value="" />
                                         </div>
                                         <div class="form-group">
                                             <label for="password">Password</label>
-                                            <input type="password" required="true"  id="password" class='form-control' value="admin" />
+                                            <input type="password" required="true"  id="password" class='form-control' value="" />
                                         </div>
                                         <div class="form-group">
                                             <label for="orgnumber">Organization</label>
-                                            <input type="text" required="true" id="orgnumber" name="orgnumber" class='form-control' value="1234"/>
+                                            <input type="text" required="true" id="orgnumber" name="orgnumber" class='form-control' value=""/>
                                         </div>
                                     </fieldset>
                                     <fieldset>
