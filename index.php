@@ -114,105 +114,106 @@
             token = localStorage.getItem("token");
             if (token === null)
             {
-                $("#pnlLogin").show();
-                $("#pnlResultados").hide();
+               $("#pnlLogin").show();
+               $("#pnlResultados").hide();
 
             } else
             {
-                CargarIndice();
+               CargarIndice();
             }
 
             //Show the index, hide the login and retrieve username and orgnumber.
             //Get id organization, list Queries, list EHRs, get Patients, 
             function CargarIndice()
             {
-                $("#pnlLogin").hide();
-                $("#pnlResultados").show();
+               $("#pnlLogin").hide();
+               $("#pnlResultados").show();
 
-                username = localStorage.getItem("username");
-                orgnumber = localStorage.getItem("orgnumber");
+               username = localStorage.getItem("username");
+               orgnumber = localStorage.getItem("orgnumber");
 
-                // Get id organizations from profile
-                $.ajax({
-                    url: "controller.php",
-                    data: {op: "getIdorg", tk: token, username: username, orgnumber: orgnumber},
-                    dataType: 'text',
-                    type: "GET"
-                })
-                        .done(function (data) {
-                            orgId = data;
-                        })
-                        .fail(function (data) {
-                            console.log(data);
-                        });
+               // Get id organizations from profile
+               $.ajax({
+                  url: "controller.php",
+                  data: {op: "getIdorg", tk: token, username: username, orgnumber: orgnumber},
+                  dataType: 'text',
+                  type: "GET"
+               })
+               .done(function (data)
+               {
+                  orgId = data;
+               })
+               .fail(function (data)
+               {
+                  console.log(data);
+               });
 
-                // Get queries from EHRServer
-                $.ajax({
-                    url: "controller.php",
-                    data: {op: "listQueries", tk: token},
-                    type: "GET"
-                })
-                        .done(function (json) {
+               // Get queries from EHRServer
+               $.ajax({
+                  url: "controller.php",
+                  data: {op: "listQueries", tk: token},
+                  type: "GET"
+               })
+               .done(function (json)
+               {
+                  //console.log(json);
+                  for (i in json.queries)
+                  {
+                     query = json.queries[i];
+                     $('[name=query]').append('<option value="' + query.uid + '" data-group="' + query.group + '">' + query.name + '</option>');
+                  }
+               })
+               .fail(function (json)
+               {
+                  console.log(json);
+               });
 
-                            //console.log(json);
+               // To be used inside the callback, if ehr.ehrId is used directly, all
+               // the options will have the same ehrId, the last procesed in the form
+               // because ajax is async.
+               var patientEHR = {};
 
-                            for (i in json.queries)
-                            {
-                                query = json.queries[i];
-                                $('[name=query]').append('<option value="' + query.uid + '" data-group="' + query.group + '">' + query.name + '</option>');
-                            }
-                        })
-                        .fail(function (json) {
+               // Get ehrs from EHRServer
+               $.ajax({
+                  url: "controller.php",
+                  data: {op: "listEHRs", tk: token},
+                  type: "GET"
+               })
+               .done(function (json)
+               {
+                  //console.log(json);
 
-                            console.log(json);
-                        });
+                  //for (i in json.ehrs)
+                  //{
+                  //    ehr = json.ehrs[i];
+                  //console.log(ehr);
 
+                  // To be used inside the callback
+                  //patientEHR[ehr.subjectUid] = ehr.uid;
+                  //}
+               })
+               .fail(function (json)
+               {
+                  console.log(json);
+               });
 
-                // To be used inside the callback, if ehr.ehrId is used directly, all
-                // the options will have the same ehrId, the last procesed in the form
-                // because ajax is async.
-                var patientEHR = {};
-
-
-                // Get ehrs from EHRServer
-                $.ajax({
-                    url: "controller.php",
-                    data: {op: "listEHRs", tk: token},
-                    type: "GET"
-                })
-                        .done(function (json) {
-
-                            //console.log(json);
-
-                            //for (i in json.ehrs)
-                            //{
-                            //    ehr = json.ehrs[i];
-                            //console.log(ehr);
-
-                            // To be used inside the callback
-                            //patientEHR[ehr.subjectUid] = ehr.uid;
-                            //}
-                        })
-                        .fail(function (json) {
-                            console.log(json);
-                        });
-
-
-                //Get the patients associated with the organization used on login
-                $.ajax({
-                    url: "controller.php",
-                    data: {op: "getPatients", tk: token},
-                    contentType: "application/json",
-                    type: "GET"
-                })
-                        .done(function (p) {
-                            for (j = 0; j < p.patients.length; j++) {
-                                $('[name=ehr]').append('<option value="' + p.patients[j].uid + '">' + p.patients[j].firstName + ' ' + p.patients[j].lastName + '</option>');
-                            }
-                        })
-                        .fail(function (json) {
-                            console.log(json);
-                        });
+               //Get the patients associated with the organization used on login
+               $.ajax({
+                  url: "controller.php",
+                  data: {op: "getPatients", tk: token},
+                  contentType: "application/json",
+                  type: "GET"
+               })
+               .done(function (p) {
+                  for (j = 0; j < p.patients.length; j++)
+                  {
+                     $('[name=ehr]').append('<option value="' + p.patients[j].uid + '">' + p.patients[j].firstName + ' ' + p.patients[j].lastName + '</option>');
+                  }
+               })
+               .fail(function (json)
+               {
+                   console.log(json);
+               });
             }
 
             //Submit form login. 
@@ -220,178 +221,192 @@
             //Then, show de index.
             $("#frmLogin").submit(function (e) {
                 
-                e.preventDefault();
+               e.preventDefault();
                 
-                // Login user
-                var user = $("#username").val();
-                var pass = $("#password").val();
-                var org = $("#orgnumber").val();
+               // Login user
+               var user = $("#username").val();
+               var pass = $("#password").val();
+               var org = $("#orgnumber").val();
 
-                if ($.trim(user).length > 0 && $.trim(org).length > 0 && $.trim(pass).length > 0)
-                {
-                    var dataString = "user=" + user + "&pass=" + pass + "&org=" + org + "&op=login";
-                    $("msgAlerta").hide();
-                    $.ajax({
-                        url: "controller.php",
-                        data: dataString,
-                        type: "POST",
-                        cache: false
-                    })
-                            .done(function (data) {
+               if ($.trim(user).length > 0 && $.trim(org).length > 0 && $.trim(pass).length > 0)
+               {
+                  var dataString = "user=" + user + "&pass=" + pass + "&org=" + org + "&op=login";
+                  $("msgAlerta").hide();
+                  $.ajax({
+                     url: "controller.php",
+                     data: dataString,
+                     type: "POST",
+                     cache: false,
+                     dataType: "json"
+                  })
+                  .done(function (data)
+                  {
+                     console.log(data);
+                     if (data === null)
+                     {
+                        alert("Invalid token");
+                     }
+                     else
+                     {                                    
+                        localStorage.setItem("token", data["token"]);
+                        token = data["token"];
+                        localStorage.setItem("username", user);
+                        localStorage.setItem("orgnumber", org);
 
-                                if (data === null) {
-                                    alert("Invalid token");
-                                } else {                                    
-                                    localStorage.setItem("token", data["token"]);
-                                    token = data["token"];
-                                    localStorage.setItem("username", user);
-                                    localStorage.setItem("orgnumber", org);
-
-                                    CargarIndice();
-                                }
-
-                            })
-                            .fail(function (json) {
-                                console.log(json);
-                            });
-                }
+                        CargarIndice();
+                     }
+                  })
+                  .fail(function (resp, error, text)
+                  {
+                     console.log(resp, error, text, resp.responseJSON.error);
+                     alert(resp.responseJSON.error);
+                  });
+               }
             });
 
 
             // Query
             $('#query_form').submit(function (evn) {
 
-                evn.preventDefault();
+               evn.preventDefault();
 
-                data = {op: "executeQuery", tk: token, org: orgId};
-                $($(this).serializeArray()).each(function (i, obj) { // Adds form data to ajax request
+               data = {op: "executeQuery", tk: token, org: orgId};
+               $($(this).serializeArray()).each(function (i, obj) // Adds form data to ajax request
+               {
+                  data[obj.name] = obj.value;
+               });
 
-                    data[obj.name] = obj.value;
-                });
+               console.log(data);
 
-                console.log(data);
+               $.ajax({
+                  url: "controller.php", 
+                  data: data, 
+                  type: "GET"
+               })
+               .done(function (result, status, xhr) {
 
-                $.ajax({url: "controller.php", data: data, type: "GET"})
-                        .done(function (result, status, xhr) {
+                  console.log("query results", result);
 
-                            //console.log(result);
+                  // result can be xml or json !
+                  var ct = xhr.getResponseHeader("content-type") || "";
 
-                            // result can be xml or json !
-                            var ct = xhr.getResponseHeader("content-type") || "";
+                  //console.log(ct); // text/xml or application/json
 
-                            //console.log(ct); // text/xml or application/json
+                  if (ct.indexOf('xml') > -1) // XML result
+                  {
+                     var pre = $('#results').append('<pre></pre>').children()[0];
+                     $(pre).text(formatXml(xmlToString(result)));
+                  }
+                  else if (ct.indexOf('json') > -1) // JSON result
+                  {
+                     var pre = $('#results').append('<pre></pre>').children()[0];
+                     $(pre).text(JSON.stringify(result, undefined, 2));
 
-                            if (ct.indexOf('xml') > -1) { // XML result
-
-                                var pre = $('#results').append('<pre></pre>').children()[0];
-                                $(pre).text(formatXml(xmlToString(result)));
-                            } else if (ct.indexOf('json') > -1) { // JSON result
-
-                                var pre = $('#results').append('<pre></pre>').children()[0];
-                                $(pre).text(JSON.stringify(result, undefined, 2));
-
-                                // Render only if query is json and grouped by path
-                                if ($('option:selected', '[name=query]').data('group') == 'path')
-                                {
-                                    render(result);
-                                }
-                            }
-                        })
-                        .fail(function (json) {
-
-                            alert('fail');
-                            console.log(json);
-                        });
+                     // Render only if query is json and grouped by path
+                     if ($('option:selected', '[name=query]').data('group') == 'path')
+                     {
+                        render(result);
+                     }
+                  }
+               })
+               .fail(function (json)
+               {
+                  alert('fail');
+                  console.log(json);
+               });
             });
 
             var render = function (data)
             {
-                var series = []; // Data to sent to Highcharts
+               var series = []; // Data to sent to Highcharts
 
-                var xAxisLabels = [];
-                var firstRound = true;
-                $.each(data, function (path, dviseries) {
+               var xAxisLabels = [];
+               var firstRound = true;
+               $.each(data, function (path, dviseries) {
 
-                    //console.log('path y dviseries', path, dviseries);
+                  console.log('path y dviseries', path, dviseries);
+                  
+                  // avoids processing timing info
+                  if (path == 'timing') return true;
+                  
+                  /**
+                   * Estructura:
+                   *   { name: 'John', data: [5, 7, 3] }
+                   *
+                   *   o si quiero mostrar una etiqueta en el punto:
+                   *   { name: 'John', data: [{name:'punto', color:'#XXX', y:5},{..},{..}] }
+                   */
+                  var serie = {name: dviseries.name, data: []};
 
-                    /**
-                     * Estructura:
-                     *   { name: 'John', data: [5, 7, 3] }
-                     *
-                     *   o si quiero mostrar una etiqueta en el punto:
-                     *   { name: 'John', data: [{name:'punto', color:'#XXX', y:5},{..},{..}] }
-                     */
-                    var serie = {name: dviseries.name, data: []};
+                  console.log("dviseries serie", dviseries.serie);
+                  
+                  // FIXME: cuidado, esto es solo para DvQuantity!!!!!
+                  $.each(dviseries.serie, function (ii, dvi) { // dvi {date, magnitude, units}
 
+                     //console.log('ii y dvi', ii, dvi);
 
-                    // FIXME: cuidado, esto es solo para DvQuantity!!!!!
-                    $.each(dviseries.serie, function (ii, dvi) { // dvi {date, magnitude, units}
+                     // Get dates from first serie, that will be the labels for xAxis
+                     if (firstRound)
+                     {
+                         d = new Date(dvi.date);
+                         xAxisLabels.push(d.getFullYear() + '/' + d.getMonth() + '/' + d.getDate()); // format the date to display
+                     }
 
-                        //console.log('ii y dvi', ii, dvi);
+                     // FIXME: el valor depende del tipo de dato, y para graficar se necesitan ordinales
+                     // TODO: ver si se pueden graficar textos y fechas
+                     // TODO: prevenir internar graficar tipos de datos que no se pueden graficar
+                     //serie.data.push( dvi.magnitude );
 
-                        // Get dates from first serie, that will be the labels for xAxis
-                        if (firstRound)
-                        {
-                            d = new Date(dvi.date);
-                            xAxisLabels.push(d.getFullYear() + '/' + d.getMonth() + '/' + d.getDate()); // format the date to display
-                        }
+                     // para que la etiqueta muestre las unidades
+                     point = {name: dvi.magnitude + ' ' + dvi.units, y: dvi.magnitude}
+                     serie.data.push(point);
 
-                        // FIXME: el valor depende del tipo de dato, y para graficar se necesitan ordinales
-                        // TODO: ver si se pueden graficar textos y fechas
-                        // TODO: prevenir internar graficar tipos de datos que no se pueden graficar
-                        //serie.data.push( dvi.magnitude );
+                  });
 
-                        // para que la etiqueta muestre las unidades
-                        point = {name: dvi.magnitude + ' ' + dvi.units, y: dvi.magnitude}
-                        serie.data.push(point);
+                  series.push(serie);
 
-                    });
+                  if (firstRound)
+                     firstRound = false;
+               });
 
-                    series.push(serie);
-
-                    if (firstRound)
-                        firstRound = false;
-                });
-
-
-                console.log('data', data);
-                console.log('series', series);
-                console.log('xAxisLabels', xAxisLabels);
-                renderchart(series, xAxisLabels);
+               console.log('data', data);
+               console.log('series', series);
+               console.log('xAxisLabels', xAxisLabels);
+               renderchart(series, xAxisLabels);
             }
 
             var renderchart = function (series, xAxisLabels)
             {
-                chart = new Highcharts.Chart({
-                    chart: {
-                        renderTo: 'chartContainer',
-                        type: 'line',
-                        zoomType: 'x' // lo deja hacer zoom en el eje x, y o ambos: xy
-                    },
+               chart = new Highcharts.Chart({
+                  chart: {
+                     renderTo: 'chartContainer',
+                     type: 'line',
+                     zoomType: 'x' // lo deja hacer zoom en el eje x, y o ambos: xy
+                  },
                     /* depende de lo que este graficando!
                      title: {
                      text: 'Blood Pressure' // TODO: obtener del arquetipo+path en la ontologia del arquetipo
                      },
                      */
-                    xAxis: {
-                        categories: xAxisLabels
-                    },
-                    /* depende de lo que este graficando!
+                  xAxis: {
+                     categories: xAxisLabels
+                  },
+                  /* depende de lo que este graficando!
                      yAxis: {
                      title: {
                      text: 'Blood Pressure mmHg' // TODO: obtener del arquetipo
                      }
                      },
-                     */
-                    plotOptions: {
-                        line: {
-                            dataLabels: {
-                                enabled: true
-                            }
+                  */
+                  plotOptions: {
+                     line: {
+                        dataLabels: {
+                           enabled: true
                         }
-                    },
-                    series: series
-                });
+                     }
+                  },
+                  series: series
+               });
             };
         </script>
     </body>

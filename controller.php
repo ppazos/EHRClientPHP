@@ -1,10 +1,12 @@
 <?php
 
 $resultType = 'json';
+$base_url = 'http://localhost:8090/ehr/rest/';
 
 function login($user, $pass, $org)
 {
-   $url = 'http://localhost:8090/ehr/rest/login';
+   global $base_url;
+   $url = $base_url .'login';
     
    $data = array('format' => 'json', 'username' => $user, 'password' => $pass, 'organization' => $org);
 
@@ -16,14 +18,23 @@ function login($user, $pass, $org)
    );
    
    // Because of GET data goes in URL
-   $result = file_get_contents($url.'?'.http_build_query($data), false, stream_context_create($options));
+   $result = @file_get_contents($url.'?'.http_build_query($data), false, stream_context_create($options));
+   
+   if ($result == FALSE)
+   {
+      header('HTTP/1.1 401 Unauthorized');
+      $res = array('error'=>'could not connect to server or user credentials are not valid');
+      $result = json_encode($res);
+   }
+   
    return $result;
 }
 
 function getIdorg($token, $username, $orgnumber)
 {
-    $url = 'http://localhost:8090/ehr/rest/profile/' . $username;
-    $data = array('format' => 'json');
+   global $base_url;
+   $url = $base_url .'profile/' . $username;
+   $data = array('format' => 'json');
 
    // use key 'http' even if you send the request to https://...
    $options = array('http'=>array('method'=>'GET', 'header' => "Authorization: Bearer " . $token));
@@ -33,12 +44,13 @@ function getIdorg($token, $username, $orgnumber)
 
    $obj = json_decode( $result, true );
    
-   foreach ($obj["organizations"] as $item){
-       if ($item["number"] == $orgnumber)
-       {
-           $result = $item["uid"];
-           break;
-       }
+   foreach ($obj["organizations"] as $item)
+   {
+      if ($item["number"] == $orgnumber)
+      {
+         $result = $item["uid"];
+         break;
+      }
    }
    return $result;
 }
@@ -46,7 +58,8 @@ function getIdorg($token, $username, $orgnumber)
 
 function listQueries($token)
 {
-    $url = 'http://localhost:8090/ehr/rest/queries';
+   global $base_url;
+   $url = $base_url .'queries';
    $data = array('format' => 'json');
 
    // use key 'http' even if you send the request to https://...
@@ -59,7 +72,8 @@ function listQueries($token)
 
 function listEHRs($token)
 {
-    $url = 'http://localhost:8090/ehr/rest/ehrs';
+   global $base_url;
+   $url = $base_url .'ehrs';
    $data = array('format' => 'json');
 
    // use key 'http' even if you send the request to https://...
@@ -72,7 +86,8 @@ function listEHRs($token)
 
 function getPatients($token)
 {
-    $url = 'http://localhost:8090/ehr/rest/patients';
+   global $base_url;
+   $url = $base_url .'patients';
    $data = array('format' => 'json');
 
    // use key 'http' even if you send the request to https://...
@@ -86,8 +101,9 @@ function getPatients($token)
 
 function executeQuery($token, $queryUID, $orgID, $ehrUID)
 {
-    $url = 'http://localhost:8090/ehr/rest/queries/' . $queryUID . '/execute';
-    $data = array('format'=>'json', 'organizationUid'=>$orgID, 'ehrUid'=>$ehrUID);
+   global $base_url;
+   $url = $base_url .'queries/'. $queryUID .'/execute';
+   $data = array('format'=>'json', 'organizationUid'=>$orgID, 'ehrUid'=>$ehrUID);
 
    // use key 'http' even if you send the request to https://...
    $options = array('http'=>array('method'=>'GET', 'header' => "Authorization: Bearer " . $token));
