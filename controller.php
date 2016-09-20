@@ -1,7 +1,8 @@
 <?php
 
 $resultType = 'json';
-$base_url = 'http://localhost:8090/ehr/rest/';
+//$base_url = 'http://localhost:8090/ehr/rest/';
+$base_url = 'http://cabolabs-ehrserver.rhcloud.com/ehr/rest/';
 
 function login($user, $pass, $org)
 {

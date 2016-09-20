@@ -156,7 +156,7 @@
                })
                .done(function (json)
                {
-                  //console.log(json);
+                  console.log('queries', json);
                   for (i in json.queries)
                   {
                      query = json.queries[i];
@@ -204,7 +204,9 @@
                   contentType: "application/json",
                   type: "GET"
                })
-               .done(function (p) {
+               .done(function (p)
+               {
+                  console.log('patients', p);
                   for (j = 0; j < p.patients.length; j++)
                   {
                      $('[name=ehr]').append('<option value="' + p.patients[j].uid + '">' + p.patients[j].firstName + ' ' + p.patients[j].lastName + '</option>');
