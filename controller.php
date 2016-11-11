@@ -1,8 +1,8 @@
 <?php
 
 $resultType = 'json';
-//$base_url = 'http://localhost:8090/ehr/rest/';
-$base_url = 'http://cabolabs-ehrserver.rhcloud.com/ehr/rest/';
+$base_url = 'http://localhost:8090/ehr/rest/';
+//$base_url = 'http://cabolabs-ehrserver.rhcloud.com/rest/';
 
 function login($user, $pass, $org)
 {
@@ -31,6 +31,7 @@ function login($user, $pass, $org)
    return $result;
 }
 
+/*
 function getIdorg($token, $username, $orgnumber)
 {
    global $base_url;
@@ -47,15 +48,18 @@ function getIdorg($token, $username, $orgnumber)
    
    foreach ($obj["organizations"] as $item)
    {
+      print_r($obj);
+      
       if ($item["number"] == $orgnumber)
       {
          $result = $item["uid"];
          break;
       }
+      
    }
    return $result;
 }
-
+*/
 
 function listQueries($token)
 {
@@ -100,11 +104,11 @@ function getPatients($token)
    return $result;
 }
 
-function executeQuery($token, $queryUID, $orgID, $ehrUID)
+function executeQuery($token, $queryUID, $ehrUID)
 {
    global $base_url;
    $url = $base_url .'queries/'. $queryUID .'/execute';
-   $data = array('format'=>'json', 'organizationUid'=>$orgID, 'ehrUid'=>$ehrUID);
+   $data = array('format'=>'json', 'ehrUid'=>$ehrUID);
 
    // use key 'http' even if you send the request to https://...
    $options = array('http'=>array('method'=>'GET', 'header' => "Authorization: Bearer " . $token));
@@ -134,9 +138,11 @@ switch ($_REQUEST['op'])
    case 'login':
       $result = login($_REQUEST['user'], $_REQUEST['pass'], $_REQUEST['org']);
    break;
+   /*
    case 'getIdorg':
       $result = getIdorg($_REQUEST['tk'], $_REQUEST['username'], $_REQUEST['orgnumber']);
    break;
+   */
    case 'listQueries':
       $result = listQueries($_REQUEST['tk']);
    break;
@@ -147,7 +153,22 @@ switch ($_REQUEST['op'])
        $result = getPatients($_REQUEST['tk']);
    break;
    case 'executeQuery':
-       $result = executeQuery($_REQUEST['tk'], $_REQUEST['query'], $_REQUEST['org'], $_REQUEST['ehr']);
+      if (!isset($_REQUEST['query']))
+      {
+         header('HTTP/1.1 400 Bad Request');
+         $res = array('error'=>'Please select a query');
+         $result = json_encode($res);
+      }
+      else if (!isset($_REQUEST['ehr']))
+      {
+         header('HTTP/1.1 400 Bad Request');
+         $res = array('error'=>'Please select an EHR');
+         $result = json_encode($res);
+      }
+      else
+      {
+         $result = executeQuery($_REQUEST['tk'], $_REQUEST['query'], $_REQUEST['ehr']);  
+      }
    break;
 }
 
