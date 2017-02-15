@@ -1,8 +1,8 @@
 <?php
 
 $resultType = 'json';
-$base_url = 'http://localhost:8090/ehr/rest/';
-//$base_url = 'http://cabolabs-ehrserver.rhcloud.com/rest/';
+$base_url = 'http://localhost:8090/ehr/api/v1/';
+//$base_url = 'http://ehrserver-cabolabs2.rhcloud.com/api/v1/';
 
 function login($user, $pass, $org)
 {
@@ -88,7 +88,7 @@ function listEHRs($token)
    $result = file_get_contents($url.'?'.http_build_query($data), false, stream_context_create($options));
    return $result;
 }
-
+/* this endpoint was removed from the API
 function getPatients($token)
 {
    global $base_url;
@@ -103,7 +103,7 @@ function getPatients($token)
    
    return $result;
 }
-
+*/
 function executeQuery($token, $queryUID, $ehrUID)
 {
    global $base_url;

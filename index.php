@@ -98,7 +98,7 @@
               </div>
               <br>
               <div>
-                <h3>Patients</h3>
+                <h3>EHRs</h3>
                 <select name="ehr" class="form-control" size="6"></select>                          
               </div>
               <br>
@@ -131,7 +131,8 @@
          $("#pnlLogin").show();
          $("#pnlResultados").hide();
 
-      } else
+      }
+      else
       {
          CargarIndice();
       }
@@ -209,26 +210,11 @@
             // To be used inside the callback
             //patientEHR[ehr.subjectUid] = ehr.uid;
             //}
-         })
-         .fail(function (json)
-         {
-            $('.alert').text(json.error).show();
-            window.setTimeout(function () { $('.alert').hide(); }, timeout);
-         });
-
-         //Get the patients associated with the organization used on login
-         $.ajax({
-            url: "controller.php",
-            data: {op: "getPatients", tk: token},
-            contentType: "application/json",
-            type: "GET"
-         })
-         .done(function (p)
-         {
-            console.log('patients', p);
-            for (j = 0; j < p.patients.length; j++)
+            
+            console.log('ehrs', json);
+            for (j = 0; j < json.ehrs.length; j++)
             {
-               $('[name=ehr]').append('<option value="' + p.patients[j].uid + '">' + p.patients[j].firstName + ' ' + p.patients[j].lastName + '</option>');
+               $('[name=ehr]').append('<option value="' + json.ehrs[j].uid + '">' + json.ehrs[j].uid + '</option>');
             }
          })
          .fail(function (json)
