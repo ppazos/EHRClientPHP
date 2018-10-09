@@ -64,32 +64,76 @@ class EHRServer {
 
   function get_queries($max = 20, $offset = 0)
   {
+    $url = $this->base_url .'queries';
     $data = array('format'=>'json', 'max'=>$max, 'offset'=>$offset);
+    $options = array('http'=>array('method'=>'GET', 'header' => "Authorization: Bearer " . $this->token));
+
+    // Because of GET data goes in URL
+    $result = file_get_contents($url.'?'.http_build_query($data), false, stream_context_create($options));
+    return json_decode($result);
   }
 
-  function execute_query($uid, $ehr_uid, $date_from, $date_to)
+  function execute_query($uid, $ehr_uid = null, $date_from = null, $date_to = null)
   {
+    $url = $this->base_url .'queries/'. $uid .'/execute';
+    $data = array('format'=>'json');
 
+    if (!is_null($ehr_uid)) $data['ehrUid'] = $ehr_uid;
+
+    $options = array('http'=>array('method'=>'GET', 'header' => "Authorization: Bearer " . $this->token));
+
+    $result = file_get_contents($url.'?'.http_build_query($data), false, stream_context_create($options));
+
+    return json_decode($result);
   }
 
   function get_templates($max = 20, $offset = 0)
   {
+    $url = $this->base_url .'templates';
     $data = array('format'=>'json', 'max'=>$max, 'offset'=>$offset);
+
+    $options = array('http'=>array('method'=>'GET', 'header' => "Authorization: Bearer " . $this->token));
+
+    // Because of GET data goes in URL
+    $result = file_get_contents($url.'?'.http_build_query($data), false, stream_context_create($options));
+
+    return json_decode($result);
   }
 
-  function get_compositions($max = 20, $offset = 0)
+  function get_compositions($ehr_uid, $max = 20, $offset = 0)
   {
-    $data = array('format'=>'json', 'max'=>$max, 'offset'=>$offset);
+    $url = $this->base_url .'compositions';
+    $data = array('format'=>'json', 'max'=>$max, 'offset'=>$offset, 'ehrUid'=>$ehr_uid);
+
+    $options = array('http'=>array('method'=>'GET', 'header' => "Authorization: Bearer " . $this->token));
+
+    $result = file_get_contents($url.'?'.http_build_query($data), false, stream_context_create($options));
+
+    return json_decode($result);
   }
 
   function get_composition($uid)
   {
+    $url = $this->base_url .'compositions/'.$uid;
+    $data = array('format'=>'json');
 
+    $options = array('http'=>array('method'=>'GET', 'header' => "Authorization: Bearer " . $this->token));
+
+    $result = file_get_contents($url.'?'.http_build_query($data), false, stream_context_create($options));
+
+    return json_decode($result);
   }
 
-  function get_contributions($max = 20, $offset = 0)
+  function get_contributions($ehr_uid, $max = 20, $offset = 0)
   {
+    $url = $this->base_url .'ehrs/'. $ehr_uid .'/contributions';
     $data = array('format'=>'json', 'max'=>$max, 'offset'=>$offset);
+
+    $options = array('http'=>array('method'=>'GET', 'header' => "Authorization: Bearer " . $this->token));
+
+    $result = file_get_contents($url.'?'.http_build_query($data), false, stream_context_create($options));
+
+    return json_decode($result);
   }
 }
 
