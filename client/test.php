@@ -13,6 +13,6 @@ $results = $ehrserver->execute_query($queries->queries[1]->uid);
 $templates = $ehrserver->get_templates();
 $compositions = $ehrserver->get_compositions($ehrs->ehrs[0]->uid);
 $document = $ehrserver->get_composition($compositions->result[0]->uid);
-$contributions = $ehrserver->get_contributions($ehrs->ehrs[0]->uid));
+$contributions = $ehrserver->get_contributions($ehrs->ehrs[0]->uid);
 
 ?>
