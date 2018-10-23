@@ -1,14 +1,6 @@
 <?php
 
-include ('ehrserver_client.php');
-
-//$ehrserver = new EHRServer('http://localhost:8090/ehr/api/v1/');
-//$res = $ehrserver->login('admin','admin','123456');
-$ehrserver = new EHRServer('http://server001.cloudehrserver.com/api/v1/');
-$ehrserver->set_token('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFwaWtleWZndXpoZ3hjdnd5cXR0Ym5pdmd6aWdvZG1tZWhscWlibHF1ZGtlbHZkc3dkZGdkb3FvIiwiZXh0cmFkYXRhIjp7Im9yZ2FuaXphdGlvbiI6IjAzMjUyMiIsIm9yZ191aWQiOiI3OWEwZjVmYS1hM2IxLTQ0OTgtOWNhYS05ZjhkZDFhMzM5MmUifSwiaXNzdWVkX2F0IjoiMjAxOC0xMC0xNVQwMzoyNDozOS40NTQtMDI6MDAifQ==.BZGGhgpnv6oOUiZR1QeZF6ZETfJjPWSbzJ6pLxF1KQs=');
-
-//echo $res->token;
-//$ehrs = $ehrserver->get_ehrs();
+include ('connection.php');
 
 $contributions = $ehrserver->get_contributions($_GET['uid']);
 $documents = $ehrserver->get_compositions($_GET['uid']);
@@ -119,12 +111,12 @@ $templates = $ehrserver->get_templates();
             </thead>
             <tbody>
               <?php foreach($templates as $i=>$template): ?>
-                <tr data-uid="<?=$template->uid?>" data-template-id="<?=$template->templateId?>" data-ehr-uid="<?=$_GET['uid']?>">
+                <tr data-uid="<?=$template['uid']?>" data-template-id="<?=$template['templateId']?>" data-ehr-uid="<?=$_GET['uid']?>">
                   <th scope="row"><?=$i+1?></th>
-                  <td><?=$template->templateId?></td>
-                  <td><?=$template->concept?></td>
-                  <td><?=$template->uid?></td>
-                  <td><?=$template->language?></td>
+                  <td><?=$template['templateId']?></td>
+                  <td><?=$template['concept']?></td>
+                  <td><?=$template['uid']?></td>
+                  <td><?=$template['language']?></td>
                 </tr>
               <?php endforeach; ?>
             </tbody>

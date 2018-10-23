@@ -107,7 +107,7 @@ class EHRServer {
 
     $result = file_get_contents($url.'?'.http_build_query($data), false, stream_context_create($options));
 
-    return json_decode($result);
+    return json_decode($result, true);
   }
 
   function get_templates($max = 20, $offset = 0)
@@ -120,7 +120,7 @@ class EHRServer {
     // Because of GET data goes in URL
     $result = file_get_contents($url.'?'.http_build_query($data), false, stream_context_create($options));
 
-    return json_decode($result);
+    return json_decode($result, true);
   }
 
   function get_template($uid)
