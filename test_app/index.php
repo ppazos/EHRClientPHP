@@ -51,7 +51,7 @@
   </head>
   <body>
     <div class="container">
-      
+
       <div class="alert alert-danger" role="alert"></div>
 
       <div id="pnlLogin" style="display:none">
@@ -99,7 +99,7 @@
               <br>
               <div>
                 <h3>EHRs</h3>
-                <select name="ehr" class="form-control" size="6"></select>                          
+                <select name="ehr" class="form-control" size="6"></select>
               </div>
               <br>
               <div>
@@ -112,7 +112,7 @@
               <h3>Results</h3>
               <div id="chartContainer"></div>
               <div id="results"></div>
-            </div>                        
+            </div>
           </div>
         </div>
       </div>
@@ -138,7 +138,7 @@
       }
 
       //Show the index, hide the login and retrieve username and orgnumber.
-      //Get id organization, list Queries, list EHRs, get Patients, 
+      //Get id organization, list Queries, list EHRs, get Patients,
       function CargarIndice()
       {
          $("#pnlLogin").hide();
@@ -210,7 +210,7 @@
             // To be used inside the callback
             //patientEHR[ehr.subjectUid] = ehr.uid;
             //}
-            
+
             console.log('ehrs', json);
             for (j = 0; j < json.ehrs.length; j++)
             {
@@ -224,13 +224,13 @@
          });
       }
 
-      //Submit form login. 
+      //Submit form login.
       //If the user is correct, save the token, username and orgnumber in localstorage.
       //Then, show de index.
       $("#frmLogin").submit(function (e) {
-          
+
         e.preventDefault();
-          
+
         // Login user
         var user = $("#username").val();
         var pass = $("#password").val();
@@ -256,7 +256,7 @@
                   window.setTimeout(function () { $('.alert').hide(); }, timeout);
                }
                else
-               {                                    
+               {
                   localStorage.setItem("token", data["token"]);
                   token = data["token"];
                   localStorage.setItem("username", user);
@@ -286,8 +286,8 @@
          });
 
          $.ajax({
-            url: "controller.php", 
-            data: data, 
+            url: "controller.php",
+            data: data,
             type: "GET"
          })
          .done(function (result, status, xhr) {
@@ -296,6 +296,8 @@
 
             // result can be xml or json !
             var ct = xhr.getResponseHeader("content-type") || "";
+
+            $('#results').empty();
 
             if (ct.indexOf('xml') > -1) // XML result
             {
@@ -330,10 +332,10 @@
          $.each(data, function (path, dviseries) {
 
             console.log('path y dviseries', path, dviseries);
-            
+
             // avoids processing timing info
             if (path == 'timing') return true;
-            
+
             /**
              * Estructura:
              *   { name: 'John', data: [5, 7, 3] }
@@ -344,7 +346,7 @@
             var serie = {name: dviseries.name, data: []};
 
             console.log("dviseries serie", dviseries.serie);
-            
+
             // FIXME: cuidado, esto es solo para DvQuantity!!!!!
             $.each(dviseries.serie, function (ii, dvi) { // dvi {date, magnitude, units}
 
